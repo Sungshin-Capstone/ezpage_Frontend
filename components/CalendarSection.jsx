@@ -33,8 +33,8 @@ const CalendarSection = ({ selectedDate, setSelectedDate }) => {
           selectedDayTextColor: '#fff',
           todayTextColor: '#000', // 오늘은 그냥 일반 텍스트처럼
           dayTextColor: '#000',
-          monthTextColor: '#2F80ED',
-          arrowColor: '#2F80ED',
+          monthTextColor: '#000',
+          arrowColor: '#BDBDBD',
           textMonthFontSize: 20,
           textMonthFontWeight: 'bold',
           textDayFontSize: 16,

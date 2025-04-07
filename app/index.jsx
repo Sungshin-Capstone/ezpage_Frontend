@@ -74,8 +74,8 @@ const styles = StyleSheet.create({
     paddingBottom: 120, // 하단 아이콘 안 가리게
   },
   navBar: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingHorizontal: 0,
+    paddingTop: 0,
     paddingBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
