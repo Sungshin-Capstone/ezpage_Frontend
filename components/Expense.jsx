@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import AddExpense from './modals/AddExpense';
 
 const dummyExpenses = {
   '2025-04-07': [
@@ -52,6 +55,8 @@ const dummyExpenses = {
 
 function Expense({selectedDate}) {
   const [expenses, setExpenses] = useState([]);
+  const router = useRouter();
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     // selectedDate가 바뀔 때마다 실행됨
@@ -66,7 +71,18 @@ function Expense({selectedDate}) {
 
   return (
     <View>
-      <Text style={styles.title}>💸 지출 내역</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>💸 지출 내역</Text>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Feather name="edit-2" size={20} color="black" />
+        </TouchableOpacity>
+      </View>
+
+      <AddExpense
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
+
       {expenses.length === 0 ? (
         <Text>지출이 없습니다.</Text>
       ) : (
@@ -89,7 +105,18 @@ function Expense({selectedDate}) {
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 16, marginTop: 20, marginBottom: 10, fontWeight: 'bold' },
+  header: {
+    paddingHorizontal: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 17,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   item: {
     backgroundColor: '#f2f2f2',
     borderRadius: 10,

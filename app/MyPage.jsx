@@ -19,7 +19,7 @@ const MyPage = () => {
       <ScrollView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.push('/')}>
+          <TouchableOpacity onPress={() => router.back()}>
             <Icon name="chevron-back" size={28} color="#363853" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>마이페이지</Text>
