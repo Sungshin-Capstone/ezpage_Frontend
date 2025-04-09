@@ -10,6 +10,7 @@ const CustomModal = ({ isVisible, onClose, onSubmit, title, children }) => {
       animationIn="slideInUp"
       animationOut="slideOutDown"
       backdropOpacity={0.3}
+      useNativeDriver={true}
       style={styles.modalContainer}
     >
       <View style={styles.modal}>
