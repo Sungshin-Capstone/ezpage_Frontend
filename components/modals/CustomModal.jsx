@@ -2,15 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
 
-interface CustomModalProps {
-  isVisible: boolean;
-  onClose: () => void;
-  onSubmit: () => void;
-  title: string;
-  children: React.ReactNode;
-}
-
-const CustomModal = ({ isVisible, onClose, onSubmit, title, children }: CustomModalProps) => {
+const CustomModal = ({ isVisible, onClose, onSubmit, title, children }) => {
   return (
     <Modal
       isVisible={isVisible}

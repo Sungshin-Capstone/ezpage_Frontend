@@ -1,12 +1,9 @@
-// components/modals/AddExpense.tsx
+// components/modals/AddExpense.js
 import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import CustomModal from './CustomModal';
 
-export default function AddExpense({ visible, onClose }: {
-  visible: boolean;
-  onClose: () => void;
-}) {
+export default function AddExpense({ visible, onClose }) {
   return (
     <CustomModal
       isVisible={visible}
@@ -17,11 +14,10 @@ export default function AddExpense({ visible, onClose }: {
       }}
       title="지출 내역 추가"
     >
-      {/* 이 영역을 페이지마다 다르게 */}
       <View style={styles.infoRow}>
         <Text style={styles.label}>일시</Text>
         <TouchableOpacity>
-            <Text style={styles.editText}>2025년 3월 31일 12:08</Text>
+          <Text style={styles.editText}>2025년 3월 31일 12:08</Text>
         </TouchableOpacity>
       </View>
 
@@ -60,7 +56,6 @@ export default function AddExpense({ visible, onClose }: {
           <Text>19,250원</Text>
         </View>
       </View>
-      
     </CustomModal>
   );
 }
@@ -93,4 +88,4 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     textDecorationLine: 'underline',
   },
-})
+});
