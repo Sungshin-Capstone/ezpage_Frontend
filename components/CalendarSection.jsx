@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import { Calendar, LocaleConfig } from 'react-native-calendars';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 LocaleConfig.locales.kr = {
   monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -31,7 +32,7 @@ const CalendarSection = ({ selectedDate, setSelectedDate }) => {
           calendarBackground: '#fff',
           textSectionTitleColor: '#333',
           selectedDayTextColor: '#fff',
-          todayTextColor: '#000', // 오늘은 그냥 일반 텍스트처럼
+          todayTextColor: '#000',
           dayTextColor: '#000',
           monthTextColor: '#000',
           arrowColor: '#BDBDBD',
@@ -46,17 +47,31 @@ const CalendarSection = ({ selectedDate, setSelectedDate }) => {
           const month = date.getMonth(); // 0~11
           const monthName = LocaleConfig.locales.kr.monthNames[month];
           return (
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: 'bold',
-                color: '#000',
-                textAlign: 'center',
-                marginVertical: 10,
-              }}
-            >
-              {`${monthName} ${year}`}
-            </Text>
+            <View style={{
+             
+              flexDirection: 'row',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              gap: 116,
+            }}>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: 'bold',
+                  color: '#000',
+                }}
+              >
+                {`${year}년 ${monthName} `}
+              </Text>
+
+              {/* 오른쪽 일정 추가 버튼 */}
+              <TouchableOpacity onPress={() => console.log('일정 추가')}>
+                <AntDesign
+                  name="pluscircleo"
+                  size={17}
+                  color="#000" />
+              </TouchableOpacity>
+            </View>
           );
         }}
         firstDay={0}
@@ -65,6 +80,6 @@ const CalendarSection = ({ selectedDate, setSelectedDate }) => {
       />
     </View>
   )
-}
+};
 
 export default CalendarSection
