@@ -55,7 +55,6 @@ const dummyExpenses = {
 
 function Expense({selectedDate}) {
   const [expenses, setExpenses] = useState([]);
-  const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {

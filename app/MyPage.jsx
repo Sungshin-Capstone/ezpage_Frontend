@@ -10,9 +10,12 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useUserStore } from '../stores/userStore';
 
 const MyPage = () => {
   const router = useRouter();
+  const { user } = useUserStore();
+  const { name, nickname, userId, email, country } = user;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -42,7 +45,7 @@ const MyPage = () => {
         <View style={styles.infoRow}>
           <Text style={styles.label}>닉네임</Text>
           <View style={styles.rowEnd}>
-            <Text>바보멍청이</Text>
+            <Text>{nickname}</Text>
             <TouchableOpacity>
               <Text style={styles.editText}>수정</Text>
             </TouchableOpacity>
@@ -50,7 +53,7 @@ const MyPage = () => {
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>아이디</Text>
-          <Text>ID1234</Text>
+          <Text>{userId}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>이메일 주소</Text>
@@ -73,7 +76,7 @@ const MyPage = () => {
           </View>
         </View>
 
-        <View style={styles.separator} />
+        <View style={styles.bottom} />
 
         {/* 로그아웃 버튼 */}
         <TouchableOpacity style={styles.logoutBtn}>
@@ -211,5 +214,9 @@ const styles = StyleSheet.create({
   footerText: {
     color: '#888',
     fontSize: 12,
+  },
+
+  bottom: {
+    marginBottom: 100,
   },
 });
