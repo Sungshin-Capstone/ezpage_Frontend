@@ -27,7 +27,7 @@ export default function Home() {
         {/* 상단 네브바 */}
         <View style={styles.navBar}>
           <TouchableOpacity>
-            <Entypo name="dots-three-vertical" size={15} color="black" />
+            <Entypo name="dots-three-vertical" size={15} color="black" onPress={() => router.push('/SignIn')}/>
           </TouchableOpacity>
           <View style={styles.rightIcons}>
             <TouchableOpacity onPress={() => router.push('/MyPage')}>

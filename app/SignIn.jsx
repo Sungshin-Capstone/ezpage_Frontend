@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 
-const LoginScreen = () => {
+function SignIn () {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
@@ -31,7 +31,7 @@ const LoginScreen = () => {
           <Text style={styles.forgotText}>Forgot your password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.signInButton}>
+        <TouchableOpacity style={styles.signInButton} onPress={() => router.replace('/Home')}>
           <Text style={styles.signInText}>Sign in</Text>
         </TouchableOpacity>
 
@@ -102,4 +102,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default SignIn;

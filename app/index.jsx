@@ -11,9 +11,9 @@ export default function Index() {
       await loadUserFromStorage();
 
       if (userToken) {
-        router.replace('/Home');  
+        router.replace('/SignIn');  
       } else {
-        router.replace('/SignIn'); 
+        router.replace('/Home');  // 둘이 바꿔야함
       }
     };
 
