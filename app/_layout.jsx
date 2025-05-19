@@ -21,7 +21,11 @@ export default function RootLayout() {
             ),
             animation: 'slide_from_right', 
           }}
-        />
+      />
+      {/* 스마트 스캐너 */}
+      <Stack.Screen
+        name="CameraScreen"
+      />
 
     </Stack>
   );

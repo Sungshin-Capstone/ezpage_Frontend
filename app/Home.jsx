@@ -51,11 +51,13 @@ export default function Home() {
       {/* 스마트 스캐너 */}
       <View style={styles.bottomIconWrapper}>
         <View style={styles.bottomIconShadow}>
+          <TouchableOpacity onPress={() => router.push('/CameraScreen')}>
           <Image
             source={require('../assets/images/ezpageIcon.png')}
             style={styles.bottomIcon}
             resizeMode="contain"
-          />
+            />
+            </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
