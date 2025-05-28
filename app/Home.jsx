@@ -7,15 +7,15 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-
-import Icon from 'react-native-vector-icons/Ionicons';
-
-// import { Entypo, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 import HomeHeader from '../components/HomeHeader';
 import CalendarSection from '../components/CalendarSection';
 import Expense from '../components/Expense';
+
+import Dots from '../assets/images/Dots.jpg';
+import UserIcon from '../assets/images/User.jpg'; 
+import SettingImage from '../assets/images/Settings.jpg'; 
 
 export default function Home() {
   const navigation = useNavigation();
@@ -29,14 +29,26 @@ export default function Home() {
         {/* 상단 네브바 */}
         <View style={styles.navBar}>
           <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-            <Icon name="dots-three-vertical" size={15} color="black" />
+            <Image
+              source={Dots}
+              style={{ width: 20, height: 20 }}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
           <View style={styles.rightIcons}>
             <TouchableOpacity onPress={() => navigation.navigate('MyPage')}>
-              <Icon name="person-outline" style={{ marginRight: 10 }} size={24} color="black" />
+              <Image
+                source={UserIcon}
+                style={{ width: 30, height: 30, marginBottom: 10, marginRight: 7 }}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
             <TouchableOpacity>
-              <Icon name="settings-outline" size={24} color="black" />
+              <Image
+                source={SettingImage}
+                style={{ width: 30, height: 30 }}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
           </View>
         </View>

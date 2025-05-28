@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,37 +10,15 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import useUserStore from '../stores/userStore';
 
 const MyPage = () => {
   const navigation = useNavigation();
+  const user = useUserStore((state) => state.user);
 
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = await AsyncStorage.getItem('accessToken');
-        if (!token) {
-          console.log('토큰이 없습니다.');
-          setLoading(false);
-          return;
-        }
-        const data = await userApi.Profile(token);
-        setProfile(data);
-      } catch (error) {
-        console.log('프로필 불러오기 실패:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  if (loading) return <ActivityIndicator size="large" color="#000" />;
-
-  if (!profile) return <Text>프로필 정보를 불러올 수 없습니다.</Text>;
+  if (!user) {
+    return <ActivityIndicator size="large" color="#000" />; // ✅ 로딩 상태 처리
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -48,7 +26,7 @@ const MyPage = () => {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="chevron-back" size={28} color="#363853" />
+            <Icon name="arrow-back" size={28} color="#363853" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>마이페이지</Text>
           <View style={{ width: 28 }} /> {/* 아이콘 없는 오른쪽 공간 맞추기 */}
@@ -70,7 +48,7 @@ const MyPage = () => {
         <View style={styles.infoRow}>
           <Text style={styles.label}>닉네임</Text>
           <View style={styles.rowEnd}>
-            <Text>{profile.nickname}</Text>
+            <Text>{user.nickname}</Text>
             <TouchableOpacity>
               <Text style={styles.editText}>수정</Text>
             </TouchableOpacity>
@@ -78,11 +56,11 @@ const MyPage = () => {
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>아이디</Text>
-          <Text>{profile.username}</Text>
+          <Text>{user.username}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>이메일 주소</Text>
-          <Text>ID1234@gmail.com</Text>
+          <Text>{user.email}</Text>
         </View>
         <TouchableOpacity style={styles.infoRow}>
           <Text style={styles.label}>비밀번호 변경</Text>
@@ -96,7 +74,7 @@ const MyPage = () => {
         <View style={styles.infoRow}>
           <Text style={styles.label}>국가 설정</Text>
           <View style={styles.languageBox}>
-            <Text style={styles.languageText}>대한민국</Text>
+            <Text style={styles.languageText}>{user.country}</Text>
             <Icon name="arrow-drop-down" size={20} color="#888" />
           </View>
         </View>

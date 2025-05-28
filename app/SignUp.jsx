@@ -53,7 +53,7 @@ function SignUp() {
               onChangeText={setName}
             />
             <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-              <Text style={styles.createAccountText}>Already have an account</Text>
+              <Text style={styles.createAccountText}>이미 계정이 있으신가요?</Text>
             </TouchableOpacity>
           </View>
         );
@@ -124,7 +124,7 @@ function SignUp() {
               dropdownIconColor="#666"
             >
               <Picker.Item label="국가를 선택하세요" value="" />
-              <Picker.Item label="한국" value="kr" />
+              <Picker.Item label="한국" value="대한민국" />
               {/* 필요하면 국가 더 추가 */}
             </Picker>
           </View>
@@ -172,7 +172,7 @@ function SignUp() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ marginTop: 50 }}>
-        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.title}>회원가입</Text>
         <Text style={styles.subtitle}>Your travel wallet is waiting</Text>
       </View>
 
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1A2BA4',
+    color: '#000',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -229,20 +229,20 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   signUpButton: {
-    backgroundColor: '#1A2BA4',
+    backgroundColor: '#D0E5FF',
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: 'center',
   },
   signUpText: {
-    color: '#fff',
+    color: '#000',
     fontSize: 16,
     fontWeight: 'bold',
   },
   createAccountText: {
     textAlign: 'center',
     fontSize: 14,
-    color: '#000',
+    color: '#737373',
   },
   picker: {
     color: '#000',

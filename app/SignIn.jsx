@@ -99,12 +99,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   forgotText: {
-    color: '#1A2BA4',
+    color: '#737373',
     fontSize: 13,
     fontWeight: '500',
   },
   signInButton: {
-    backgroundColor: '#1A2BA4',
+    backgroundColor: '#D0E5FF',
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: 'center',

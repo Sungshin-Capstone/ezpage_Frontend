@@ -17,7 +17,7 @@ export default function AddExpense({ visible, onClose }) {
       <View style={styles.infoRow}>
         <Text style={styles.label}>일시</Text>
         <TouchableOpacity>
-          <Text style={styles.editText}>2025년 3월 31일 12:08</Text>
+          <Text style={styles.editText}>2025년 3월 31일</Text>
         </TouchableOpacity>
       </View>
 

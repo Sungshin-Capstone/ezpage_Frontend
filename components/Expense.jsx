@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import AddExpense from './modals/AddExpense';
+import expenseApi from '../apis/expense';
+import useUserStore from '../stores/userStore';
 
 const dummyExpenses = {
   '2025-04-07': [
@@ -52,20 +54,25 @@ const dummyExpenses = {
   ],
 };
 
-function Expense({selectedDate}) {
+function Expense({ selectedDate }) {
   const [expenses, setExpenses] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const { accessToken } = useUserStore();
 
   useEffect(() => {
-    // selectedDate가 바뀔 때마다 실행됨
     const fetchExpenses = async () => {
-      // 여기에 서버 요청도 가능
-      const data = dummyExpenses[selectedDate] || [];
-      setExpenses(data);
+      if (!accessToken) return; // 토큰 없으면 요청 안 함
+      try {
+        const data = await expenseApi.viewExpense(accessToken, selectedDate);
+        setExpenses(data);
+      } catch (error) {
+        console.error('지출 내역 조회 실패:', error);
+        setExpenses([]);
+      }
     };
 
     fetchExpenses();
-  }, [selectedDate]); // ← selectedDate가 바뀔 때만 작동
+  }, [selectedDate, accessToken]); 
 
   return (
     <View>
