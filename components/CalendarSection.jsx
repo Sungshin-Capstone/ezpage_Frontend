@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import AddSchedule from './modals/AddSchedule';
@@ -34,26 +34,44 @@ const CalendarSection = ({ selectedDate, setSelectedDate }) => {
   const [schedules, setSchedules] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleAddSchedule = (newSchedule) => {
-    setSchedules((prev) => [...prev, newSchedule]);
+  const handleAddSchedule = async (newSchedule) => {
+    if (!accessToken) return;
+    const formattedSchedule = {
+      ...newSchedule,
+      start_date: newSchedule.start_date.toISOString().split('T')[0],
+      end_date: newSchedule.end_date.toISOString().split('T')[0],
+    };
+
+    setSchedules((prev) => [...prev, formattedSchedule]);
+    
+    try {
+    const allSchedules = await tripApi.addTrip(accessToken, formattedSchedule);
+    console.log('여행 일정 추가됨:', formattedSchedule);
+    setModalVisible(false);
+  } catch (error) {
+    console.error('여행 일정 추가 실패:', error);
+    Alert.alert('오류', '여행 일정 추가에 실패했습니다. 다시 시도해주세요.');
+  }
+
+  setSelectedDate(formattedSchedule.start_date);
   };
 
   // 📌 일정들을 markedDates로 변환
   const markedDates = schedules.reduce((acc, schedule) => {
-    const range = getDateRange(schedule.startDate, schedule.endDate);
+    const range = getDateRange(schedule.start_date, schedule.end_date);
     Object.keys(range).forEach(date => {
       acc[date] = {
         ...acc[date],
         customStyles: {
           container: {
-            backgroundColor: schedule.color,
+            backgroundColor: schedule.color || '#0048FF',
             borderRadius: 6,
           },
           text: {
             color: 'white',
             fontWeight: 'bold',
-          }
-        }
+          },
+        },
       };
     });
     return acc;
@@ -64,6 +82,7 @@ const CalendarSection = ({ selectedDate, setSelectedDate }) => {
       selectedTextColor: '#0048FF',
     }
   });
+
 
   return (
     <View>

@@ -1,78 +1,50 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import AddExpense from './modals/AddExpense';
 import expenseApi from '../apis/expense';
 import useUserStore from '../stores/userStore';
-
-const dummyExpenses = {
-  '2025-04-07': [
-    {
-      name: 'STARBUCKS',
-      time: '14:04',
-      amount: '- ¥450',
-      krw: '4,469.79 원',
-      icon: require('../assets/images/icon.png'),
-    },
-    {
-      name: '편의점',
-      time: '09:15',
-      amount: '- ¥200',
-      krw: '1,987.54 원',
-      icon: require('../assets/images/icon.png'),
-    },
-    {
-      name: '편의점',
-      time: '09:15',
-      amount: '- ¥200',
-      krw: '1,987.54 원',
-      icon: require('../assets/images/icon.png'),
-    },
-    {
-      name: '편의점',
-      time: '09:15',
-      amount: '- ¥200',
-      krw: '1,987.54 원',
-      icon: require('../assets/images/icon.png'),
-    },
-    {
-      name: '편의점',
-      time: '09:15',
-      amount: '- ¥200',
-      krw: '1,987.54 원',
-      icon: require('../assets/images/icon.png'),
-    },
-  ],
-  '2025-04-06': [
-    {
-      name: '점심식사',
-      time: '12:30',
-      amount: '- ¥800',
-      krw: '7,920.00 원',
-      icon: require('../assets/images/icon.png'),
-    },
-  ],
-};
+import moment from 'moment';
 
 function Expense({ selectedDate }) {
   const [expenses, setExpenses] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const { accessToken } = useUserStore();
 
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      if (!accessToken) return; // 토큰 없으면 요청 안 함
-      try {
-        const data = await expenseApi.viewExpense(accessToken, selectedDate);
-        setExpenses(data);
-      } catch (error) {
-        console.error('지출 내역 조회 실패:', error);
-        setExpenses([]);
-      }
-    };
+  const formattedSelectedDate = moment(selectedDate).format('YYYY-MM-DD');
 
-    fetchExpenses();
-  }, [selectedDate, accessToken]); 
+  useEffect(() => {
+  const fetchExpenses = async () => {
+    if (!accessToken) return;
+
+    try {
+      const allExpenses = await expenseApi.viewExpense(accessToken, formattedSelectedDate);
+      console.log('받아온 지출 내역:', allExpenses);  // 여기에 출력
+      const filtered = allExpenses.filter(expense => expense.date === formattedSelectedDate);
+      setExpenses(filtered);
+      console.log('formattedSelectedDate:', formattedSelectedDate);
+    } catch (error) {
+      console.error('지출 내역 조회 실패:', error);
+      setExpenses([]);
+    }
+  };
+
+  fetchExpenses();
+}, [formattedSelectedDate, accessToken]);
+
+  const handleAddExpense = async (newExpense) => {
+  if (!accessToken) return;
+
+  try {
+    await expenseApi.addExpense(accessToken, newExpense);
+    const allExpenses = await expenseApi.viewExpense(accessToken, formattedSelectedDate);
+    const filtered = allExpenses.filter(expense => expense.date === formattedSelectedDate);
+    setExpenses(filtered);
+    } catch (error) {
+      console.error('지출 추가 실패:', error);
+    Alert.alert('지출 추가에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
 
   return (
     <View>
@@ -86,6 +58,7 @@ function Expense({ selectedDate }) {
       <AddExpense
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
+        onAdd={handleAddExpense}
       />
 
       {expenses.length === 0 ? (
@@ -93,14 +66,16 @@ function Expense({ selectedDate }) {
       ) : (
         expenses.map((item, index) => (
           <View style={styles.item} key={index}>
-            <Image source={item.icon} style={styles.icon} />
+            <Text style={styles.icon}>
+              {item.category === 'FOOD' ? '🍣' : item.category === 'TRANSPORT' ? '🚗' : '🛒'}
+            </Text>
             <View style={styles.info}>
-              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.name}>{item.description}</Text>
               <Text style={styles.time}>{item.time}</Text>
             </View>
             <View style={styles.amountBox}>
-              <Text style={styles.amount}>{item.amount}</Text>
-              <Text style={styles.krw}>{item.krw}</Text>
+              <Text style={styles.amount}>{item.amount.toLocaleString()} {item.currency}</Text>
+              {/* <Text style={styles.krw}>{item.krw}</Text> */}
             </View>
           </View>
         ))
@@ -130,7 +105,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  icon: { width: 40, height: 40, marginRight: 10 },
+  icon: { fontSize: 24, marginRight: 10, },
   info: { flex: 1 },
   name: { fontWeight: 'bold' },
   time: { color: '#888', fontSize: 12 },

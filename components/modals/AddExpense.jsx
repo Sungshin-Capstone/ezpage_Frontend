@@ -1,67 +1,125 @@
-// components/modals/AddExpense.js
-import React from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import RNPickerSelect from 'react-native-picker-select';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import CustomModal from './CustomModal';
+import moment from 'moment';
+import DropDownPicker from 'react-native-dropdown-picker';
 
-export default function AddExpense({ visible, onClose }) {
+export default function AddExpense({ visible, onClose, onAdd }) {
+  const [date, setDate] = useState(new Date());
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState(null);
+  const [description, setDescription] = useState('');
+
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState([
+    { label: '식비', value: 'FOOD' },
+    { label: '교통', value: 'TRANSPORT' },
+    { label: '쇼핑', value: 'SHOPPING' },
+    { label: '기타', value: 'ETC' },
+  ]);
+
+  const handleConfirm = (selectedDate) => {
+    setDate(selectedDate);
+    setDatePickerVisibility(false);
+  };
+
+  const handleSubmit = () => {
+    if (!category || !amount || !description || isNaN(parseFloat(amount))) {
+      alert('모든 항목을 올바르게 입력해 주세요!');
+      return;
+  }
+    const payload = {
+      amount: parseFloat(amount),
+      currency: 'JPY',
+      date: moment(date).format('YYYY-MM-DD'),
+      time: moment(date).format('HH:mm'),
+      category,
+      description,
+      manual_input: true,
+      is_scan_result: false,
+    };
+
+    console.log('추가될 지출 내역:', payload);
+    
+    if (onAdd) {
+      onAdd(payload);  // 부모에서 전달된 함수 호출해서 실제 API 요청 처리
+    }
+    onClose();  // 모달 닫기
+  };
+
   return (
     <CustomModal
       isVisible={visible}
       onClose={onClose}
-      onSubmit={() => {
-        console.log('지출 내역 추가됨');
-        onClose();
-      }}
+      onSubmit={handleSubmit}
       title="지출 내역 추가"
     >
-      <View style={styles.infoRow}>
+      <View style={styles.row}>
+        <Text style={styles.label}>지출 내용</Text>
+        <TextInput
+          style={styles.input}
+          value={description}
+          onChangeText={setDescription}
+          placeholder="예: 스시"
+        />
+      </View>
+      
+      <View style={styles.row}>
         <Text style={styles.label}>일시</Text>
-        <TouchableOpacity>
-          <Text style={styles.editText}>2025년 3월 31일</Text>
+        <TouchableOpacity onPress={() => setDatePickerVisibility(true)}>
+          <Text style={styles.value1}>{moment(date).format('YYYY년 M월 D일 HH:mm')}</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.infoRow}>
+      <View style={styles.row}>
         <Text style={styles.label}>지출 금액</Text>
-        <View style={styles.rowEnd}>
-          <Text>7,800엔</Text>
-          <TouchableOpacity>
-            <Text style={styles.editText}>수정</Text>
-          </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          value={amount}
+          onChangeText={setAmount}
+          placeholder="예: 7800"
+        />
+      </View>
+
+      <View style={styles.row}>
+        <Text style={[styles.label, { flex: 1 }]}>카테고리</Text>
+        <View style={{ width: 150 }}>
+          <DropDownPicker
+            open={open}
+            value={category}
+            items={items}
+            setOpen={setOpen}
+            setValue={setCategory}
+            setItems={setItems}
+            placeholder="선택하세요"
+            style={styles.dropdown}
+            placeholderStyle={{color: '#aaa', fontSize: 16}}
+            textStyle={{color: '#000', fontSize: 16}}
+            dropDownContainerStyle={styles.dropdownContainer}
+            
+          />
         </View>
       </View>
 
-      <View style={styles.infoRow}>
-        <Text style={styles.label}>모임 인원</Text>
-        <View style={styles.rowEnd}>
-          <Text style={styles.info}>4명</Text>
-          <TouchableOpacity>
-            <Text style={styles.editText}>수정</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.infoRow}>
-        <Text style={styles.label}>별칭</Text>
-        <View style={styles.rowEnd}>
-          <TouchableOpacity>
-            <Text style={styles.editText}>입력하기</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.infoRow}>
-        <Text style={styles.label}>1/N 계산 금액</Text>
-        <View style={styles.rowEnd}>
-          <Text>19,250원</Text>
-        </View>
-      </View>
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="datetime"
+        date={date}
+        onConfirm={handleConfirm}
+        onCancel={() => setDatePickerVisibility(false)}
+      />
     </CustomModal>
   );
 }
 
 const styles = StyleSheet.create({
-  infoRow: {
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
@@ -73,19 +131,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  rowEnd: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+  value: {
+    fontSize: 16,
+    color: '#767676',
   },
-  info: {
-    color: '#000',
-    fontSize: 14,
-  },
-  editText: {
-    color: '#888',
-    fontSize: 13,
-    marginLeft: 6,
+  value1: {
+    fontSize: 16,
+    color: '#767676',
     textDecorationLine: 'underline',
+  },
+  input: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    fontSize: 16,
+    backgroundColor: '#EEEEEE',
+  },
+  dropdown: {
+    backgroundColor: '#EEEEEE',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    borderWidth: 0, 
+    width: 150,
+  },
+  dropdownContainer: {
+    backgroundColor: '#EEEEEE',
+    borderRadius: 8,
+    borderWidth: 0,
+    width: 150,
   },
 });

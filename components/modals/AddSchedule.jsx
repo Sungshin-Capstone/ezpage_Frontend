@@ -4,7 +4,7 @@ import { Text, View, StyleSheet, TouchableOpacity, TextInput, Platform, } from '
 import CustomModal from './CustomModal';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const COLORS = ['#FF3B30', '#FF9500', '#FFD60A', '#34C759', '#5AC8FA', '#007AFF'];
+const COLORS = ['#FFB3B3', '#FFBF87', '#FFF5B7', '#AFF6A7', '#A8F5FF', '#78B0FF'];
 
 export default function AddSchedule({ visible, onClose, onSubmit }) {
   const [travelName, setTravelName] = useState('');
@@ -17,10 +17,11 @@ export default function AddSchedule({ visible, onClose, onSubmit }) {
     if (!travelName || !destination || !selectedColor) return;
 
     const scheduleData = {
-      travelName,
-      destination,
-      startDate,
-      endDate,
+      name: travelName,
+      country: destination,
+      start_date: startDate,
+      end_date: endDate,
+      companions: "1",
       color: selectedColor,
     };
 
@@ -32,6 +33,8 @@ export default function AddSchedule({ visible, onClose, onSubmit }) {
     setStartDate(new Date());
     setEndDate(new Date());
     setSelectedColor(null);
+
+    console.log('여행 일정 추가됨:', scheduleData);
   };
 
   return (
