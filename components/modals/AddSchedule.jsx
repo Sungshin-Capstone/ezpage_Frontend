@@ -3,49 +3,58 @@ import React, { useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, TextInput, Platform, } from 'react-native';
 import CustomModal from './CustomModal';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import tripApi from '../../apis/trip';
 
 const COLORS = ['#FFB3B3', '#FFBF87', '#FFF5B7', '#AFF6A7', '#A8F5FF', '#78B0FF'];
 
-export default function AddSchedule({ visible, onClose, onSubmit }) {
+export default function AddSchedule({ visible, onClose, onSuccess }) {
   const [travelName, setTravelName] = useState('');
   const [destination, setDestination] = useState('');
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [selectedColor, setSelectedColor] = useState(null);
 
-  const handleSubmit = () => {
-    if (!travelName || !destination || !selectedColor) return;
-
-    const scheduleData = {
-      name: travelName,
-      country: destination,
-      start_date: startDate,
-      end_date: endDate,
-      companions: "1",
-      color: selectedColor,
-    };
-
-    onSubmit(scheduleData); // 부모 컴포넌트로 전달
-    onClose();
-    // 초기화
+  const resetForm = () => {
     setTravelName('');
     setDestination('');
     setStartDate(new Date());
     setEndDate(new Date());
     setSelectedColor(null);
+  };
 
-    console.log('여행 일정 추가됨:', scheduleData);
+  const handleSubmit = async () => {
+    if (!travelName || !destination || !selectedColor) {
+      Alert.alert('입력 오류', '모든 필드를 입력해 주세요.');
+      return;
+    }
+
+    const scheduleData = {
+      name: travelName,
+      country: destination,
+      start_date: startDate.toISOString().split('T')[0],
+      end_date: endDate.toISOString().split('T')[0],
+      companions: "1",
+      color: selectedColor,
+    };
+
+    try {
+      const response = await tripApi.addTrip(scheduleData);
+      console.log('전송할 schedule:', scheduleData);
+      console.log('여행 추가 성공:', response);
+      if (onSuccess) onSuccess(response); // 부모로 전달
+      resetForm();
+      onClose();
+    } catch (error) {
+      console.error('여행 추가 실패:', error);
+      Alert.alert('추가 실패', '일정 추가 중 오류가 발생했습니다.');
+    }
   };
 
   return (
     <CustomModal
       isVisible={visible}
       onClose={onClose}
-      onSubmit={() => {
-        handleSubmit();
-        console.log('여행 일정 추가됨');
-        onClose();
-      }}
+      onSubmit={handleSubmit}
       title="여행 일정 설정"
     >
       <View style={{ padding: 7 }}>

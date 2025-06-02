@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import AddSchedule from './modals/AddSchedule';
+import tripApi from '../apis/trip';
 
 // 로케일 설정
 LocaleConfig.locales.kr = {
@@ -30,30 +31,39 @@ const getDateRange = (start, end) => {
   return range;
 };
 
-const CalendarSection = ({ selectedDate, setSelectedDate }) => {
+const CalendarSection = ({ selectedDate, setSelectedDate, accessToken }) => {
   const [schedules, setSchedules] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // ✅ 여행 데이터 불러오기 (초기 로드)
+  useEffect(() => {
+    const fetchTrips = async () => {
+      try {
+        const id = 3; // 추후 trip_id 리스트를 서버에서 가져오도록 수정 가능
+        const trip = await tripApi.getTrip(id);
+        setSchedules([trip]);
+      } catch (error) {
+        console.error('일정 로드 실패:', error);
+      }
+    };
+    fetchTrips();
+  }, []);
+
   const handleAddSchedule = async (newSchedule) => {
-    if (!accessToken) return;
     const formattedSchedule = {
       ...newSchedule,
       start_date: newSchedule.start_date.toISOString().split('T')[0],
       end_date: newSchedule.end_date.toISOString().split('T')[0],
     };
 
-    setSchedules((prev) => [...prev, formattedSchedule]);
-    
     try {
-    const allSchedules = await tripApi.addTrip(accessToken, formattedSchedule);
-    console.log('여행 일정 추가됨:', formattedSchedule);
-    setModalVisible(false);
-  } catch (error) {
-    console.error('여행 일정 추가 실패:', error);
-    Alert.alert('오류', '여행 일정 추가에 실패했습니다. 다시 시도해주세요.');
-  }
-
-  setSelectedDate(formattedSchedule.start_date);
+      const savedTrip = await tripApi.addTrip(accessToken, formattedSchedule);
+      setSchedules(prev => [...prev, savedTrip]);
+      setModalVisible(false);
+      setSelectedDate(formattedSchedule.start_date);
+    } catch (error) {
+      Alert.alert('오류', '일정 추가 실패');
+    }
   };
 
   // 📌 일정들을 markedDates로 변환
@@ -83,13 +93,29 @@ const CalendarSection = ({ selectedDate, setSelectedDate }) => {
     }
   });
 
+  // ✅ 날짜 클릭 시 해당 일정 정보 알림 표시
+  const handleDayPress = (day) => {
+    const clickedDate = day.dateString;
+    setSelectedDate(clickedDate);
+
+    const match = schedules.find(
+      (schedule) => clickedDate >= schedule.start_date && clickedDate <= schedule.end_date
+    );
+
+    if (match) {
+      Alert.alert(
+        `${match.name}`,
+        `국가: ${match.country}\n기간: ${match.start_date} ~ ${match.end_date}\n동행자 수: ${match.companions}`,
+      );
+    }
+  };
 
   return (
     <View>
       <Calendar
-        onDayPress={(day) => setSelectedDate(day.dateString)}
+        onDayPress={handleDayPress}
         markedDates={markedDates}
-        markingType={'custom'}
+        markingType="custom"
         theme={{
           backgroundColor: '#fff',
           calendarBackground: '#fff',

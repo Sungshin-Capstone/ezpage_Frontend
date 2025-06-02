@@ -35,6 +35,7 @@ const userApi = {
     }
 
       await AsyncStorage.setItem("accessToken", accessToken);
+      console.log("로그인 성공, accessToken 저장됨:", accessToken);
       return true;
     } catch (err) {
       console.log("로그인 실패", err);

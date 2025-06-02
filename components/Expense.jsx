@@ -6,6 +6,7 @@ import expenseApi from '../apis/expense';
 import useUserStore from '../stores/userStore';
 import moment from 'moment';
 
+
 function Expense({ selectedDate }) {
   const [expenses, setExpenses] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -67,7 +68,7 @@ function Expense({ selectedDate }) {
         expenses.map((item, index) => (
           <View style={styles.item} key={index}>
             <Text style={styles.icon}>
-              {item.category === 'FOOD' ? '🍣' : item.category === 'TRANSPORT' ? '🚗' : '🛒'}
+              {item.category === 'FOOD' ? '🍱' : item.category === 'TRANSPORT' ? '🚗' : item.category === 'SHOPPING' ? '🛒' : '➰'}
             </Text>
             <View style={styles.info}>
               <Text style={styles.name}>{item.description}</Text>

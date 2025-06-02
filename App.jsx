@@ -17,7 +17,7 @@ export default function App() {
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
 
   return (
     <NavigationContainer>

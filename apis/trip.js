@@ -1,14 +1,18 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api"
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const tripApi = {
-  addTrip: async (accessToken, formData) => {
+  addTrip: async (formData) => {
     try {
-      const response = await api.post("/api/v1/trips/", { ...formData }, {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      if (!accessToken) throw new Error('Access token not found');
+
+      const response = await api.post("/api/v1/trips/", formData, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
+
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -24,19 +28,24 @@ const tripApi = {
       throw error;
     }
   },
-  getTrip: async (accessToken, trip_id) => {
+
+  getTrip: async (trip_id) => {
     try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      if (!accessToken) throw new Error('Access token을 찾을 수 없습니다.');
+
       const response = await api.get(`/api/v1/trips/${trip_id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
+
       return response.data;
     } catch (error) {
       console.error('여행 정보 조회 실패:', error);
       throw error;
     }
   },
-}
+};
 
 export default tripApi;

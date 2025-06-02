@@ -28,7 +28,6 @@ function SignIn() {
   }
 };
 
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ padding: 24 }}>
