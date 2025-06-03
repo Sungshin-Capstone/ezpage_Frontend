@@ -1,9 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
-import Icon from 'react-native-vector-icons/Ionicons';
+import * as CameraRoll from '@react-native-camera-roll/camera-roll';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { launchImageLibrary } from 'react-native-image-picker';
+import aiPaymentGuide from '../apis/aiPaymentGuide';
+import { aiGlobalMoneyScanner } from '../apis/aiGlobalMoneyScanner';
+import AddMenu from '../components/modals/AddMenu';
+import GlobalMoneyResultModal from '../components/modals/GlobalMoneyResultModal';
+import PaymentGuide from '../components/modals/PaymentGuide';
 
 const CameraScreen = () => {
   const [hasPermission, setHasPermission] = useState(false);
@@ -11,7 +16,20 @@ const CameraScreen = () => {
   const [useAIGuide, setUseAIGuide] = useState(true);
   const devices = useCameraDevices();
   const device = devices.back ?? devices.front ?? devices[0] ?? devices[1];
+  const cameraRef = useRef(null);
+  const [lastPhotoUri, setLastPhotoUri] = useState(null);
 
+  const [aiScannerResult, setAiScannerResult] = useState(null);
+  const [aiPaymentResult, setAiPaymentResult] = useState(null);
+  const [showResultModal1, setShowResultModal1] = useState(false);
+  const [showResultModal2, setShowResultModal2] = useState(false);
+  const [showAddMenuModal, setShowAddMenuModal] = useState(false);
+  const [selectedMenus, setSelectedMenus] = useState([]);
+
+  useEffect(() => {
+    console.log('CameraRoll:', CameraRoll);
+  }, []);
+  
   useEffect(() => {
     const requestPermission = async () => {
       const status = await Camera.requestCameraPermission();
@@ -24,18 +42,81 @@ const CameraScreen = () => {
     setCameraPosition(prev => (prev === 'back' ? 'front' : 'back'));
   };
 
-  const handleCapture = () => {
-    // 촬영 로직 자리 (Vision Camera API 연동 예정)
-    console.log('촬영 버튼 클릭됨');
+  const handleCapture = async () => {
+    if (cameraRef.current == null) return;
+
+    try {
+      const photo = await cameraRef.current.takePhoto({
+        flash: 'off',
+      });
+
+      const imageUri = `file://${photo.path}`;
+      console.log('📸 사진 URI:', imageUri);
+
+      setLastPhotoUri(imageUri);
+
+      if (useAIGuide) {
+        console.log('🤖 AI 지불 가이드로 이미지 전송 중...');
+        const result = await aiPaymentGuide(imageUri);
+        if (result) {
+          console.log('✅ 전송 완료, 결과:', result);
+          setAiPaymentResult(result);
+          setShowAddMenuModal(true);
+        } else {
+          console.warn('⚠️ 전송은 완료되었으나 결과가 없습니다.');
+        }
+      } else {
+        console.log('🌍 글로벌 머니 스캐너로 이미지 전송 중...');
+        const result = await aiGlobalMoneyScanner(imageUri);
+        if (result) {
+          console.log('✅ 글로벌 스캐너 결과:', result);
+          setAiScannerResult(result);
+          setShowResultModal2(true);
+        } else {
+          console.warn('⚠️ 글로벌 스캐너 결과가 없습니다.');
+        }
+      }
+    } catch (e) {
+      console.error('❌ 촬영 또는 전송 실패:', e.message);
+      console.log('🛠️ 상세:', e);
+    }
   };
 
   const openGallery = () => {
-    launchImageLibrary({ mediaType: 'photo' }, (response) => {
-      if (response.assets && response.assets.length > 0) {
-        console.log('선택한 이미지:', response.assets[0].uri);
+  launchImageLibrary({ mediaType: 'photo' }, async (response) => {
+    if (response.assets && response.assets.length > 0) {
+      const selectedImageUri = response.assets[0].uri;
+      console.log('📁 선택한 이미지:', selectedImageUri);
+      setLastPhotoUri(selectedImageUri);
+
+      try {
+        if (useAIGuide) {
+          console.log('🤖 AI 지불 가이드로 이미지 전송 중...');
+          const result = await aiPaymentGuide(selectedImageUri);
+          if (result) {
+            console.log('✅ 전송 완료, 결과:', result);
+            setAiPaymentResult(result);  
+            setShowAddMenuModal(true);  
+          } else {
+            console.warn('⚠️ 전송은 완료되었으나 결과가 없습니다.');
+          }
+        } else {
+          console.log('🌍 글로벌 머니 스캐너로 이미지 전송 중...');
+          const result = await aiGlobalMoneyScanner(selectedImageUri);
+          if (result) {
+            console.log('✅ 글로벌 스캐너 결과:', result);
+            setAiScannerResult(result);
+            setShowResultModal2(true);
+          } else {
+            console.warn('⚠️ 글로벌 스캐너 결과가 없습니다.');
+          }
+        }
+      } catch (error) {
+        console.error('❌ 갤러리 이미지 전송 실패:', error.message || error);
       }
-    });
-  };
+    }
+  });
+};
 
   if (hasPermission === null) {
   return (
@@ -66,35 +147,24 @@ if (!hasPermission) {
       <View style={styles.container}>
         <Camera
           style={StyleSheet.absoluteFill}
+          ref={cameraRef}
           device={device}
           isActive={true}
+          photo={true}
         />
-
-        {/* 상단 옵션 바 */}
-        <View style={styles.topBar}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>↻</Text>
-            <Text style={styles.iconSubText}>30</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Icon name="volume-mute" size={22} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={toggleCamera}>
-            <Icon name="camera-reverse" size={22} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.iconText}>?</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={[styles.iconText, { color: 'red' }]}>X</Text>
-          </TouchableOpacity>
-        </View>
 
         <View style={styles.fullBottomWrapper}>
           {/* 하단 촬영 + 갤러리 바 */}
           <View style={styles.captureBar}>
             <TouchableOpacity onPress={openGallery}>
-              <Image source={{ uri: 'https://placehold.co/40x40.png' }} style={styles.thumbnail} />
+              <Image
+                source={
+                  lastPhotoUri
+                    ? { uri: lastPhotoUri }
+                    : { uri: 'https://placehold.co/40x40.png' }
+                }
+                style={styles.thumbnail}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleCapture}>
@@ -118,6 +188,36 @@ if (!hasPermission) {
           </View>
         </View>
       </View>
+      {showAddMenuModal && (
+        <AddMenu
+          isVisible={showAddMenuModal}
+          onClose={() => setShowAddMenuModal(false)}
+          onSubmit={(selectedItems) => {
+            console.log('선택된 메뉴 ID:', selectedItems);
+            setSelectedMenus(selectedItems);
+            setShowAddMenuModal(false);
+            setShowResultModal1(true);
+          }}
+          menus={aiPaymentResult}
+        />
+      )}
+      {showResultModal1 && (
+        <PaymentGuide
+          isVisible={showResultModal1}
+          onClose={() => setShowResultModal1(false)}
+          onSubmit={() => {
+            setShowResultModal1(false);
+          }}
+          selectedMenus={selectedMenus} 
+        />
+      )}
+      {showResultModal2 && (
+        <GlobalMoneyResultModal
+          isVisible={showResultModal2}
+          onClose={() => setShowResultModal2(false)}
+          result={aiScannerResult}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -162,8 +262,9 @@ const styles = StyleSheet.create({
   },
   
   camerabutton: {
-    width: 100,
-    height: 100,
+    width: 70,
+    height: 70,
+    margin: 20,
   },
   fullBottomWrapper: {
   position: 'absolute',

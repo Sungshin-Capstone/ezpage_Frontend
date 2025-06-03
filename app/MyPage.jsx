@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Image
 } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import useUserStore from '../stores/userStore';
@@ -35,8 +36,6 @@ const MyPage = () => {
       Alert.alert('로그아웃 실패', '로그아웃 중 오류가 발생했습니다.');
       return;
     }
-    
-    
   };
 
   return (
@@ -45,18 +44,16 @@ const MyPage = () => {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            {/* <Icon name="arrow-back" size={28} color="#363853" /> */}
-            <Image source={require('../assets/images/lessthan.png')} style={{ width: 17, height: 17 }} />
+            <Icon name="arrow-back" size={28} color="#363853" /> 
           </TouchableOpacity>
           <Text style={styles.headerTitle}>마이페이지</Text>
-          <View style={{ width: 28 }} /> {/* 아이콘 없는 오른쪽 공간 맞추기 */}
+          <View style={{ width: 28 }} /> 
         </View>
 
         {/* Profile Icon */}
         <View style={styles.profileWrapper}>
           <View style={styles.profileCircle}>
-            {/* <Icon name="person" size={65} color="#000" /> */}
-            <Text style={{ fontSize: 65, color: '#000' }}>👤</Text>
+            <Icon name="person" size={65} color="#000" />
           </View>
         </View>
 
@@ -96,7 +93,7 @@ const MyPage = () => {
           <Text style={styles.label}>국가 설정</Text>
           <View style={styles.languageBox}>
             <Text style={styles.languageText}>{user.country}</Text>
-            <Icon name="arrow-drop-down" size={20} color="#888" />
+            <MaterialIcons name="arrow-drop-down" size={20} color="#888" />
           </View>
         </View>
 

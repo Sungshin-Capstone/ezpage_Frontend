@@ -13,7 +13,17 @@ import HomeHeader from '../components/HomeHeader';
 import CalendarSection from '../components/CalendarSection';
 import Expense from '../components/Expense';
 
-import Dots from '../assets/images/Dots.jpg';
+import Entypo from 'react-native-vector-icons/Entypo';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+// JSX 안에서
+<Entypo
+  name="dots-three-vertical"
+  size={15}
+  color="black"
+  onPress={() => router.push('/SignIn')}
+/>
+
 import UserIcon from '../assets/images/User.jpg'; 
 import SettingImage from '../assets/images/Settings.jpg'; 
 
@@ -29,26 +39,14 @@ export default function Home() {
         {/* 상단 네브바 */}
         <View style={styles.navBar}>
           <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-            <Image
-              source={Dots}
-              style={{ width: 20, height: 20 }}
-              resizeMode="contain"
-            />
+            <Entypo name="dots-three-vertical" size={15} color="black" onPress={() => navigation.navigate('SignIn')}/>
           </TouchableOpacity>
           <View style={styles.rightIcons}>
             <TouchableOpacity onPress={() => navigation.navigate('MyPage')}>
-              <Image
-                source={UserIcon}
-                style={{ width: 30, height: 30, marginBottom: 10, marginRight: 7 }}
-                resizeMode="contain"
-              />
+              <Ionicons name="person-outline" size={24} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Image
-                source={SettingImage}
-                style={{ width: 30, height: 30 }}
-                resizeMode="contain"
-              />
+            <TouchableOpacity style={{ marginLeft: 10 }} >
+              <Ionicons name="settings-outline" size={24} color="black" />
             </TouchableOpacity>
           </View>
         </View>
@@ -101,7 +99,7 @@ const styles = StyleSheet.create({
   },
   bottomIconWrapper: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 15,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -115,7 +113,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   bottomIcon: {
-    width: 100,
-    height: 100,
+    width: 60,
+    height: 60,
   },
 });

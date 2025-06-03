@@ -73,7 +73,7 @@ function HomeHeader() {
         >
           <View style={{ padding: 15 }}>
             <Text style={styles.label}>현재 보유 중인 금액</Text>
-            <Text style={styles.value}>$ 653</Text>
+            <Text style={styles.value}>¥ 653</Text>
           </View>
           <View style={{padding: 13 }}>
             <Text style={styles.change}>92만 8,305원</Text>

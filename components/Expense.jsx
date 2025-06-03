@@ -13,7 +13,6 @@ function Expense({ selectedDate }) {
   const [modalVisible, setModalVisible] = useState(false);
   const { accessToken } = useUserStore();
   const { todayTrip, setTodayTrip } = useTripStore();
-  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // 오늘 여행 정보 가져오기(화폐 반영)
   useEffect(() => {

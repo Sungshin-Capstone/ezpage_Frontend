@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import useUserStore from '../stores/userStore';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const MyWallet = () => {
   const navigation = useNavigation();
@@ -14,8 +15,7 @@ const MyWallet = () => {
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            {/* <Icon name="chevron-back" size={28} color="#363853" /> */}
-            <Image source={require('../assets/images/lessthan.png')} style={{ width: 17, height: 17 }} />
+            <Icon name="arrow-back" size={28} color="#363853" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>마이 월렛</Text>
           <View style={{ width: 28 }} />

@@ -8,6 +8,7 @@ import SignIn from './app/SignIn';
 import SignUp from './app/SignUp';
 import MyWallet from './app/MyWallet';
 import useUserStore from './stores/userStore';
+import SplashScreen from "react-native-splash-screen";
 
 
 const Stack = createNativeStackNavigator();
@@ -19,6 +20,12 @@ export default function App() {
     fetchUser();
   }, [fetchUser]);
 
+  useEffect(() => {
+    setTimeout(() => {
+      SplashScreen.hide();
+    }, 3000); 
+  });
+  
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
