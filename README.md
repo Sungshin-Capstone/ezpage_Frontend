@@ -10,6 +10,7 @@
 </table>  
 Frontend 파트를 맡은 성신여자대학교 AI 20221341 김은하입니다
 
+```
 ├── \010utils
 │   └── countryCodeToFlag.js
 ├── App.jsx
@@ -35,7 +36,7 @@ Frontend 파트를 맡은 성신여자대학교 AI 20221341 김은하입니다
 │   └── modals : 모달 - 지출 내역 추가, 여행 일정 추가
 ├── config.js
 ├── index.js
-
+```
 
 ### 🔐 로그인 / 회원가입
 - 로그인 / 회원가입 페이지 구현
