@@ -46,6 +46,24 @@ const tripApi = {
       throw error;
     }
   },
+
+  getAllTrips: async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      if (!accessToken) throw new Error('Access token을 찾을 수 없습니다.');
+
+      const response = await api.get("/api/v1/trips/", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('모든 여행 정보 조회 실패:', error);
+      throw error;
+    }
+  },
 };
 
 export default tripApi;

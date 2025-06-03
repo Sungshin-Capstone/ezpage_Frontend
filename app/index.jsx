@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useUserStore } from '../stores/userStore';
 

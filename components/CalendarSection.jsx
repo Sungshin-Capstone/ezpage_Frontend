@@ -35,18 +35,19 @@ const CalendarSection = ({ selectedDate, setSelectedDate, accessToken }) => {
   const [schedules, setSchedules] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // ✅ 여행 데이터 불러오기 (초기 로드)
+  // ✅ 여행 데이터 불러오기
   useEffect(() => {
-    const fetchTrips = async () => {
-      try {
-        const id = 3; // 추후 trip_id 리스트를 서버에서 가져오도록 수정 가능
-        const trip = await tripApi.getTrip(id);
-        setSchedules([trip]);
-      } catch (error) {
-        console.error('일정 로드 실패:', error);
-      }
-    };
-    fetchTrips();
+    const fetchAllTrips = async () => {
+    try {
+      const trips = await tripApi.getAllTrips(); // 모든 여행 가져오기
+      console.log("여행 목록:", trips);
+      setSchedules(trips);
+    } catch (error) {
+      console.error('일정 로드 실패:', error);
+    }
+  };
+
+  fetchAllTrips();
   }, []);
 
   const handleAddSchedule = async (newSchedule) => {
@@ -66,32 +67,40 @@ const CalendarSection = ({ selectedDate, setSelectedDate, accessToken }) => {
     }
   };
 
-  // 📌 일정들을 markedDates로 변환
   const markedDates = schedules.reduce((acc, schedule) => {
-    const range = getDateRange(schedule.start_date, schedule.end_date);
-    Object.keys(range).forEach(date => {
-      acc[date] = {
-        ...acc[date],
-        customStyles: {
-          container: {
-            backgroundColor: schedule.color || '#0048FF',
-            borderRadius: 6,
-          },
-          text: {
-            color: 'white',
-            fontWeight: 'bold',
-          },
-        },
-      };
-    });
-    return acc;
-  }, {
-    [selectedDate]: {
-      selected: true,
-      selectedColor: '#ffffff',
-      selectedTextColor: '#0048FF',
-    }
-  });
+  const start = schedule.start_date;
+  const end = schedule.end_date;
+  const color = schedule.color || '#70d7c7';
+
+  const current = new Date(start);
+  const endDate = new Date(end);
+
+  while (current <= endDate) {
+    const dateStr = current.toISOString().split('T')[0];
+
+    acc[dateStr] = {
+      ...(acc[dateStr] || {}),
+      color,
+      textColor: 'white',
+      startingDay: dateStr === start,
+      endingDay: dateStr === end,
+    };
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return acc;
+}, {});
+
+// 선택된 날짜가 markedDates에 없으면 기본 마킹 추가
+if (!markedDates[selectedDate]) {
+  markedDates[selectedDate] = {
+    startingDay: true,
+    endingDay: true,
+    color: '#ffffff',
+    textColor: '#0048FF',
+  };
+}
 
   // ✅ 날짜 클릭 시 해당 일정 정보 알림 표시
   const handleDayPress = (day) => {
@@ -115,7 +124,7 @@ const CalendarSection = ({ selectedDate, setSelectedDate, accessToken }) => {
       <Calendar
         onDayPress={handleDayPress}
         markedDates={markedDates}
-        markingType="custom"
+        markingType="period"
         theme={{
           backgroundColor: '#fff',
           calendarBackground: '#fff',
@@ -158,7 +167,8 @@ const CalendarSection = ({ selectedDate, setSelectedDate, accessToken }) => {
               </Text>
 
               <TouchableOpacity onPress={() => setModalVisible(true)}>
-                <AntDesign name="pluscircleo" size={17} color="#000" />
+                {/* <AntDesign name="pluscircleo" size={17} color="#000" /> */}
+                <Text style={{ fontSize: 20, color: '#000' }}>+</Text>
               </TouchableOpacity>
 
               <AddSchedule

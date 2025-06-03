@@ -45,7 +45,12 @@ const userApi = {
 
   logOut: async () => {
     try {
-      const res = await api.post("/api/v1/logout/", {});
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      const res = await api.post("/api/v1/logout/", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       console.log("로그아웃 성공", res);
       await AsyncStorage.removeItem("accessToken");
@@ -59,9 +64,9 @@ const userApi = {
   Profile: async (accessToken) => {
     try {
     const response = await api.get("/api/v1/profile/", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
     });
       return response.data;  
       

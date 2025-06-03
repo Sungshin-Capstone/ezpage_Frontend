@@ -1,7 +1,6 @@
 import React from 'react';
-import { ScrollView, TouchableOpacity, View, StyleSheet, Text } from 'react-native';
+import { ScrollView, TouchableOpacity, View, StyleSheet, Text, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import useUserStore from '../stores/userStore';
@@ -15,7 +14,8 @@ const MyWallet = () => {
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="chevron-back" size={28} color="#363853" />
+            {/* <Icon name="chevron-back" size={28} color="#363853" /> */}
+            <Image source={require('../assets/images/lessthan.png')} style={{ width: 17, height: 17 }} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>마이 월렛</Text>
           <View style={{ width: 28 }} />
@@ -23,7 +23,9 @@ const MyWallet = () => {
 
         <View style={{ padding: 10 }}>
           <Text style={{ fontSize: 20, fontWeight: '600' }}>
-            현재 {user.name}님이 보유 중인 금액
+            현재 <Text style={{ fontSize: 20, fontWeight: '700' }}>
+            {user.nickname}
+          </Text>님이 보유 중인 금액
           </Text>
           <Text style={{ fontSize: 14, marginTop: 5 }}>
             지금까지의 현금 지출을 반영했어요
@@ -120,7 +122,6 @@ const styles = StyleSheet.create({
   },
   bill: {
     padding: 10,
-    // React Native는 gap 지원 안해서 대신 marginBottom 등으로 조절하세요
   },
   subText: {
     fontSize: 12,

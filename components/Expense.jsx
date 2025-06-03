@@ -1,16 +1,41 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
-import Feather from 'react-native-vector-icons/Feather';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import AddExpense from './modals/AddExpense';
 import expenseApi from '../apis/expense';
 import useUserStore from '../stores/userStore';
 import moment from 'moment';
+import { useTripStore } from '../stores/useTripStore';
+import tripApi from '../apis/trip';
 
 
 function Expense({ selectedDate }) {
   const [expenses, setExpenses] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const { accessToken } = useUserStore();
+  const { todayTrip, setTodayTrip } = useTripStore();
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // 오늘 여행 정보 가져오기(화폐 반영)
+  useEffect(() => {
+    const fetchTrips = async () => {
+    try {
+      const allTrips = await tripApi.getAllTrips(); 
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      const matchedTrip = allTrips.find((trip) => {
+        return todayStr >= trip.start_date && todayStr <= trip.end_date;
+      });
+
+      setTodayTrip(matchedTrip); 
+    } catch (e) {
+      console.error('🔥 여행 불러오기 실패:', e);
+      setTodayTrip(null); 
+    }
+  };
+
+  fetchTrips();
+  }, []);
+
 
   const formattedSelectedDate = moment(selectedDate).format('YYYY-MM-DD');
 
@@ -20,7 +45,7 @@ function Expense({ selectedDate }) {
 
     try {
       const allExpenses = await expenseApi.viewExpense(accessToken, formattedSelectedDate);
-      console.log('받아온 지출 내역:', allExpenses);  // 여기에 출력
+      console.log('받아온 지출 내역:', allExpenses); 
       const filtered = allExpenses.filter(expense => expense.date === formattedSelectedDate);
       setExpenses(filtered);
       console.log('formattedSelectedDate:', formattedSelectedDate);
@@ -47,12 +72,19 @@ function Expense({ selectedDate }) {
     }
   };
 
+  const currencySymbols = {
+    KRW: '₩',
+    USD: '$',
+    JPY: '¥',
+    CNY: '¥', 
+  };
+
   return (
     <View>
       <View style={styles.header}>
         <Text style={styles.title}>💸 지출 내역</Text>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Feather name="edit-2" size={20} color="black" />
+          <Text style={{ fontSize: 20, color: 'black' }}>+</Text>
         </TouchableOpacity>
       </View>
 
@@ -60,6 +92,7 @@ function Expense({ selectedDate }) {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onAdd={handleAddExpense}
+        todayTrip={todayTrip}
       />
 
       {expenses.length === 0 ? (
@@ -75,8 +108,9 @@ function Expense({ selectedDate }) {
               <Text style={styles.time}>{item.time}</Text>
             </View>
             <View style={styles.amountBox}>
-              <Text style={styles.amount}>{item.amount.toLocaleString()} {item.currency}</Text>
-              {/* <Text style={styles.krw}>{item.krw}</Text> */}
+              <Text style={styles.amount}>
+                {currencySymbols[item.currency] || ''} {item.amount.toLocaleString()}
+              </Text>
             </View>
           </View>
         ))
