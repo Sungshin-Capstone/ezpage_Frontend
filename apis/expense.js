@@ -19,7 +19,7 @@ const expenseApi = {
 
   addExpense: async (accessToken, formData) => {
     try {
-      const response = await api.post("/api/v1/expenses/", { ...formData },
+      const response = await api.post("/api/v1/expenses/menu_payment/", { ...formData },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -36,7 +36,6 @@ const expenseApi = {
         // 요청이 이루어졌지만 응답을 받지 못한 경우
         console.error('응답 없음:', error.request);
       } else {
-        // 요청 설정 중에 발생한 에러
         console.error('요청 에러:', error.message);
       }
       console.error('에러 설정:', error.config);
@@ -46,13 +45,11 @@ const expenseApi = {
 
   addAiExpense: async (accessToken, formData) => {
     try {
-      const response = await api.post("/api/v1/expenses/ai/", { ...formData },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await api.post("/api/v1/expenses/ai/", formData, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       return response.data;
     } catch (error) {
       if (error.response) {
@@ -65,6 +62,7 @@ const expenseApi = {
       } else {
         console.error('요청 에러:', error.message);
       }
+      throw error;
     }
   },
 };

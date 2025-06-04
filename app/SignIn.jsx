@@ -14,8 +14,6 @@ function SignIn() {
     try {
       const reqOk = await userApi.signIn(username, password);
       if (reqOk) {
-        await userApi.fetchUser();
-        Alert.alert("로그인 성공", "환영합니다!");
         navigation.replace('Home');
       } else {
         Alert.alert("로그인 실패", "아이디 또는 비밀번호가 올바르지 않습니다.");
