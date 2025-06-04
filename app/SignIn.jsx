@@ -1,32 +1,31 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import userApi from '../apis/user';
-import { Alert } from 'react-native';
 
 function SignIn() {
   const navigation = useNavigation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); 
 
   const handleLogin = async () => {
-    console.log("로그인 버튼 클릭됨");
-    console.log(username, password)
-  try {
-    const reqOk = await userApi.signIn(username, password);
-    console.log("서버 응답:", reqOk);
-    if (reqOk) {
-      console.log("로그인 성공");
-      navigation.replace('Home');
-    } else {
-      console.log("로그인 실패 - 응답은 false");
-      Alert.alert("로그인 실패", "아이디 또는 비밀번호가 올바르지 않습니다.");
+    setLoading(true); 
+    try {
+      const reqOk = await userApi.signIn(username, password);
+      if (reqOk) {
+        await userApi.fetchUser();
+        Alert.alert("로그인 성공", "환영합니다!");
+        navigation.replace('Home');
+      } else {
+        Alert.alert("로그인 실패", "아이디 또는 비밀번호가 올바르지 않습니다.");
+      }
+    } catch (err) {
+      Alert.alert("로그인 실패", "로그인에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setLoading(false); 
     }
-  } catch (err) {
-    console.error("로그인 중 오류 발생:", err);
-    Alert.alert("로그인 실패", "로그인에 실패했습니다. 다시 시도해주세요.");
-  }
-};
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -55,8 +54,16 @@ function SignIn() {
           <Text style={styles.forgotText}>Forgot your password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.signInButton} onPress={handleLogin}>
-          <Text style={styles.signInText}>Sign in</Text>
+        <TouchableOpacity
+          style={styles.signInButton}
+          onPress={handleLogin}
+          disabled={loading} // 로딩 중엔 버튼 비활성화
+        >
+          {loading ? (
+            <ActivityIndicator color="#1A2BA4" />
+          ) : (
+            <Text style={styles.signInText}>Sign in</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
@@ -65,7 +72,7 @@ function SignIn() {
       </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

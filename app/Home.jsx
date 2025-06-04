@@ -16,17 +16,6 @@ import Expense from '../components/Expense';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-// JSX 안에서
-<Entypo
-  name="dots-three-vertical"
-  size={15}
-  color="black"
-  onPress={() => router.push('/SignIn')}
-/>
-
-import UserIcon from '../assets/images/User.jpg'; 
-import SettingImage from '../assets/images/Settings.jpg'; 
-
 export default function Home() {
   const navigation = useNavigation();
   const [selectedDate, setSelectedDate] = useState(
