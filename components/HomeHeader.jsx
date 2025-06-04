@@ -5,7 +5,7 @@ import useUserStore from '../stores/userStore';
 import { useTripStore } from '../stores/useTripStore';
 import { useEffect } from 'react';
 import tripApi from '../apis/trip';
-import { countryCodeToFlag } from '../\butils/countryCodeToFlag';
+import { countryCodeToFlag } from '../utils/countryCodeToFlag';
 
 function HomeHeader() {
   const navigation = useNavigation();
