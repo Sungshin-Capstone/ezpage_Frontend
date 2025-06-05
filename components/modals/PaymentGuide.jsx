@@ -306,7 +306,7 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
   const currencySymbol = paymentResult?.currency || '$';
 
   // 📌 api 호출
-  // 1. 지불 가이드 지출 등록
+  // 지불 가이드 지출 등록
   const handleSubmit = async () => {
     const payload = {
       trip_id: todayTripId,
@@ -325,7 +325,7 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
       }
     } catch (err) {
       console.error('지불 가이드 지출 등록 실패:', err);
-      Alert.alert('지불 가이드 지출 등록에 실패했습니다.'); 
+      Alert.alert('선택한 메뉴 지출 등록에 실패했습니다.'); 
     }
   }
 

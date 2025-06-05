@@ -26,6 +26,8 @@ const CameraScreen = () => {
   const [showAddMenuModal, setShowAddMenuModal] = useState(false);
   const [selectedMenus, setSelectedMenus] = useState([]);
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     console.log('CameraRoll:', CameraRoll);
   }, []);
@@ -44,6 +46,7 @@ const CameraScreen = () => {
 
   const handleCapture = async () => {
     if (cameraRef.current == null) return;
+    setLoading(true);
 
     try {
       const photo = await cameraRef.current.takePhoto({
@@ -79,6 +82,8 @@ const CameraScreen = () => {
     } catch (e) {
       console.error('❌ 촬영 또는 전송 실패:', e.message);
       console.log('🛠️ 상세:', e);
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -88,6 +93,7 @@ const CameraScreen = () => {
       const selectedImageUri = response.assets[0].uri;
       console.log('📁 선택한 이미지:', selectedImageUri);
       setLastPhotoUri(selectedImageUri);
+      setLoading(true);
 
       try {
         if (useAIGuide) {
@@ -113,6 +119,8 @@ const CameraScreen = () => {
         }
       } catch (error) {
         console.error('❌ 갤러리 이미지 전송 실패:', error.message || error);
+      } finally {
+        setLoading(false); 
       }
     }
   });
@@ -166,7 +174,13 @@ if (!hasPermission) {
                 style={styles.thumbnail}
               />
             </TouchableOpacity>
-
+            
+            {loading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+            )}
+            
             <TouchableOpacity onPress={handleCapture}>
               <Image source={require('../assets/images/ezpageIcon.png')} style={styles.camerabutton} />
             </TouchableOpacity>
@@ -312,6 +326,14 @@ const styles = StyleSheet.create({
     borderRightColor: 'transparent',
     borderBottomColor: 'white',
     marginTop: 2,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
   },
 });
 
