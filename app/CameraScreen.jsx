@@ -9,6 +9,7 @@ import { aiGlobalMoneyScanner } from '../apis/aiGlobalMoneyScanner';
 import AddMenu from '../components/modals/AddMenu';
 import GlobalMoneyResultModal from '../components/modals/GlobalMoneyResultModal';
 import PaymentGuide from '../components/modals/PaymentGuide';
+import { ActivityIndicator } from 'react-native-paper';
 
 const CameraScreen = () => {
   const [hasPermission, setHasPermission] = useState(false);
