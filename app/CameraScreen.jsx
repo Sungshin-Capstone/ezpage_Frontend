@@ -161,6 +161,11 @@ if (!hasPermission) {
           isActive={true}
           photo={true}
         />
+        {loading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+        )}
 
         <View style={styles.fullBottomWrapper}>
           {/* 하단 촬영 + 갤러리 바 */}
@@ -175,12 +180,6 @@ if (!hasPermission) {
                 style={styles.thumbnail}
               />
             </TouchableOpacity>
-            
-            {loading && (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator size="large" color="#fff" />
-          </View>
-            )}
             
             <TouchableOpacity onPress={handleCapture}>
               <Image source={require('../assets/images/ezpageIcon.png')} style={styles.camerabutton} />

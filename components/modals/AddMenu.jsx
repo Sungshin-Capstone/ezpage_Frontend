@@ -6,12 +6,14 @@ const AddMenu = ({ isVisible, onClose, onSubmit, menus = [] }) => {
   const [selectedItems, setSelectedItems] = useState([]);
 
   const toggleSelect = (item) => {
+    
     const exists = selectedItems.find((i) => i.menu_ko === item.menu_ko);
     if (exists) {
       setSelectedItems(selectedItems.filter((i) => i.menu_ko !== item.menu_ko));
     } else {
       setSelectedItems([...selectedItems, item]);
     }
+    console.log('🔍 선택된 아이템:', item);
   };
 
   const renderItem = ({ item }) => {

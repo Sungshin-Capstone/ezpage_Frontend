@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import CustomModal from './CustomModal';
 import expenseApi from '../../apis/expense';
 
@@ -308,26 +308,59 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
   // 📌 api 호출
   // 지불 가이드 지출 등록
   const handleSubmit = async () => {
-    const payload = {
-      trip_id: todayTripId,
-      total_price_original: totalUSD,
-      total_price_krw: totalKRW,
-      menus: selectedMenus,
-    };
+ console.log('=== 지불 가이드 제출 시작 ===');
+ console.log('📊 selectedMenus:', selectedMenus);
+ console.log('💰 totalUSD:', totalUSD);
+ console.log('💰 totalKRW:', totalKRW);
+ 
+ // 가격 문자열을 숫자로 변환하는 함수
+ const parsePrice = (priceStr) => {
+   if (!priceStr) return 0;
+   // "$3.70" -> 3.70, "5,050원" -> 5050
+   return parseFloat(priceStr.replace(/[$,원]/g, ''));
+ };
+ 
+ // 메뉴 데이터를 숫자 가격으로 변환
+ const processedMenus = selectedMenus.map(menu => ({
+   currency: menu.currency,
+   menu_ko: menu.menu_ko,
+   menu_original: menu.menu_original,
+   price_krw: parsePrice(menu.price_krw), // 숫자로 변환: "5,050원" -> 5050
+   price_original: parsePrice(menu.price_original), // 숫자로 변환: "$3.70" -> 3.70
+ }));
+ 
+ console.log('🔄 변환된 메뉴들:', processedMenus);
+ 
+ const payload = {
+   trip_id: 9,
+   total_price_original: totalUSD,
+   total_price_krw: totalKRW,
+   menus: processedMenus, // 변환된 메뉴 사용
+ };
+ 
+ console.log('📦 전송할 payload:', JSON.stringify(payload, null, 2));
 
-    try {
-      const addExpense = await expenseApi.addAiExpense(payload);
-      console.log('지불 가이드 지출 등록 결과:', addExpense);
-      if (addExpense) {
-        Alert.alert('선택한 메뉴 지출이 등록되었습니다.');
-        onClose();
-        onSubmit();
-      }
-    } catch (err) {
-      console.error('지불 가이드 지출 등록 실패:', err);
-      Alert.alert('선택한 메뉴 지출 등록에 실패했습니다.'); 
+  try {
+    console.log('🚀 API 호출 시작...');
+    const addExpense = await expenseApi.addAiExpense(payload);
+    console.log('✅ 지불 가이드 지출 등록 결과:', addExpense);
+    console.log('✅ 결과 상세:', JSON.stringify(addExpense, null, 2));
+    
+    if (addExpense) {
+      console.log('🎉 성공 - Alert 표시');
+      Alert.alert('선택한 메뉴 지출이 등록되었습니다.');
+      onClose();
+      onSubmit();
+    } else {
+      console.log('⚠️ 결과가 falsy값');
     }
+  } catch (err) {
+    console.error('❌ 지불 가이드 지출 등록 실패:', err);
+    console.error('❌ 에러 상세:', err.message);
+    console.error('❌ 에러 스택:', err.stack);
+    Alert.alert('선택한 메뉴 지출 등록에 실패했습니다.');
   }
+};
 
   return (
     <CustomModal
