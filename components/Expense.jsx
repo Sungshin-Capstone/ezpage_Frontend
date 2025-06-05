@@ -67,7 +67,18 @@ function Expense({ selectedDate }) {
     setExpenses(filtered);
     } catch (error) {
       console.error('지출 추가 실패:', error);
-    Alert.alert('지출 추가에 실패했습니다. 다시 시도해주세요.');
+    console.error('🔹 message:', error.message);
+    if (error.response) {
+      console.error('🔹 response.status:', error.response.status);
+      console.error('🔹 response.data:', error.response.data);
+      console.error('🔹 response.headers:', error.response.headers);
+    } else if (error.request) {
+      console.error('🔹 요청은 갔지만 응답이 없습니다:', error.request);
+    } else {
+      console.error('🔹 에러 설정:', error.config);
+    }
+
+    Alert.alert('지출 추가에 실패했습니다.');
     }
   };
 

@@ -44,7 +44,7 @@ function HomeHeader() {
       }
       try {
         console.log(`[loadWallet] todayTripId: ${todayTripId}로 지갑 정보 요청`);
-        const data = await walletApi.getWalletInfo(9);
+        const data = await walletApi.getWalletInfo(todayTripId);
         setWalletInfo(data);
         console.log('[loadWallet] 지갑 정보 로드 성공:', data);
       } catch (e) {

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import CustomModal from './CustomModal';
 import expenseApi from '../../apis/expense';
+import { useTodayTripIdStore } from '../../stores/useTodayTripIdStore';
 
 // 결제 전략 열거형
 const PaymentStrategy = {
@@ -267,6 +268,8 @@ class IntegratedPaymentSystem {
 }
 
 const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guideResult }) => {
+  const todayTripId = useTodayTripIdStore((state) => state.todayTripId);
+
   // selectedMenus에서 실제 가격 합산 계산
   const calculatedTotal = useMemo(() => {
     if (!selectedMenus || selectedMenus.length === 0) return 0;
@@ -284,16 +287,12 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
   const paymentResult = useMemo(() => {
     const system = new IntegratedPaymentSystem();
     
-    // 더미 지갑 데이터 
     const dummyWallet = {
-      20.0: 0,   
-      10.0: 1,   
-      5.0: 3,    
-      1.0: 3,    
-      0.25: 0,   
-      0.10: 0,   
-      0.05: 0,   
-      0.01: 5,   
+      50.0: 1,
+      10.0: 2,
+      5.0: 2,
+      2.0: 1,
+      20.0: 1,
     };
     
     // 실제 total 값이 있으면 사용하고, 없으면 더미값 사용
@@ -332,7 +331,7 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
  console.log('🔄 변환된 메뉴들:', processedMenus);
  
  const payload = {
-   trip_id: 9,
+   trip_id: todayTripId,
    total_price_original: totalUSD,
    total_price_krw: totalKRW,
    menus: processedMenus, // 변환된 메뉴 사용

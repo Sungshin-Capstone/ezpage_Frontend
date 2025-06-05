@@ -13,6 +13,8 @@ const useUserStore = create((set) => ({
     const profile = await userApi.Profile(token);
     set({ user: profile, accessToken: token });
   },
+  setUser: (user) => set({ user }),
+  setAccessToken: (token) => set({ accessToken: token }),
 }));
 
 export default useUserStore;

@@ -7,36 +7,46 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
-  Image
+  Alert,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import useUserStore from '../stores/userStore';
 import userApi from '../apis/user';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MyPage = () => {
   const navigation = useNavigation();
   const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
 
   if (!user) {
     return <ActivityIndicator size="large" color="#000" />; // ✅ 로딩 상태 처리
   }
 
-  // 로그아웃
   const handleLogout = async () => {
-    console.log('로그아웃 버튼 클릭됨');
-    try {
-      const logout = await userApi.logOut();
-      if (logout) {
-        navigation.navigate('SignIn'); // 로그인 화면으로 이동
-      }
-    } catch (error) {
-      console.error('로그아웃 실패:', error);
-      Alert.alert('로그아웃 실패', '로그아웃 중 오류가 발생했습니다.');
-      return;
-    }
-  };
+  console.log('✅ 로그아웃: 캐시만 삭제');
+
+  try {
+    // 1. AsyncStorage에서 토큰 제거 (또는 전체 초기화)
+    await AsyncStorage.removeItem('accessToken');
+    // 또는 전체 초기화하려면:
+    // await AsyncStorage.clear();
+
+    // 2. 사용자 상태 초기화
+    setUser(null);
+
+    // 3. 로그인 화면으로 이동 (기존 내비게이션 스택 초기화)
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'SignIn' }],
+    });
+  } catch (error) {
+    console.error('❌ 로그아웃 실패:', error);
+    Alert.alert('로그아웃 실패', '캐시 삭제 중 오류가 발생했습니다.');
+  }
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>

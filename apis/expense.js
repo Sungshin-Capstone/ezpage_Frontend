@@ -19,7 +19,7 @@ const expenseApi = {
 
   addExpense: async (accessToken, formData) => {
     try {
-      const response = await api.post("/api/v1/expenses/menu_payment/", { ...formData },
+      const response = await api.post("/api/v1/expenses/", { ...formData },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
