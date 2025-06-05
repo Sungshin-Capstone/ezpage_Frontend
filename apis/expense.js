@@ -42,6 +42,7 @@ const expenseApi = {
       throw error;
     }
   },
+  // 지불 가이드 지출 등록
   addAiExpense: async (formData) => {
     try {
       const accessToken = await AsyncStorage.getItem('accessToken');
@@ -66,6 +67,7 @@ const expenseApi = {
       throw error;
     }
   },
+  
 };
 
 export default expenseApi;

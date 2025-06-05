@@ -306,23 +306,26 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
   const currencySymbol = paymentResult?.currency || '$';
 
   // 📌 api 호출
+  // 1. 지불 가이드 지출 등록
   const handleSubmit = async () => {
-    try {
-      const addExpense = await expenseApi.addAiExpense(
-        {
-          trip_id: tripId,
-          amount: totalUSD,
-          currency: 'USD',
-          payment_method: 'AI',
-          items: selectedMenus.map(menu => ({
-            id: menu.id,
-            name: menu.name,
-            price: menu.price
-          }))
-        }
-      )
-    } catch (err) {
+    const payload = {
+      trip_id: todayTripId,
+      total_price_original: totalUSD,
+      total_price_krw: totalKRW,
+      menus: selectedMenus,
+    };
 
+    try {
+      const addExpense = await expenseApi.addAiExpense(payload);
+      console.log('지불 가이드 지출 등록 결과:', addExpense);
+      if (addExpense) {
+        Alert.alert('선택한 메뉴 지출이 등록되었습니다.');
+        onClose();
+        onSubmit();
+      }
+    } catch (err) {
+      console.error('지불 가이드 지출 등록 실패:', err);
+      Alert.alert('지불 가이드 지출 등록에 실패했습니다.'); 
     }
   }
 
@@ -330,7 +333,7 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
     <CustomModal
       isVisible={isVisible}
       onClose={onClose}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       title="AI 지불 가이드"
     >
       <ScrollView style={{ maxHeight: 550 }}>

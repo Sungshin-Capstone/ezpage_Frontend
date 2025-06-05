@@ -37,18 +37,24 @@ function HomeHeader() {
   }, []);
   
   useEffect(() => {
-  const loadWallet = async () => {
-    if (!todayTripId) return;
-    try {
-      const data = await walletApi.getWalletInfo(todayTripId);
-      setWalletInfo(data);
-    } catch (e) {
-      console.error('지갑 정보 불러오기 실패:', e);
-    }
-  };
+    const loadWallet = async () => {
+      if (!todayTripId) {
+        console.log('[loadWallet] todayTripId 없음, 지갑 정보 로드 안함');
+        return;
+      }
+      try {
+        console.log(`[loadWallet] todayTripId: ${todayTripId}로 지갑 정보 요청`);
+        const data = await walletApi.getWalletInfo(9);
+        setWalletInfo(data);
+        console.log('[loadWallet] 지갑 정보 로드 성공:', data);
+      } catch (e) {
+        console.error('[loadWallet] 지갑 정보 불러오기 실패:', e);
+      }
+    };
 
-  fetchAndStoreTodayTripId(); 
-  loadWallet(); 
+    console.log('[useEffect] fetchAndStoreTodayTripId 호출');
+    fetchAndStoreTodayTripId();
+    loadWallet();
   }, [todayTripId]);
   
   const renderTripInfo = () => {
@@ -90,7 +96,7 @@ function HomeHeader() {
           <View style={{ padding: 15 }}>
             <Text style={styles.label}>현재 보유 중인 금액</Text>
             <Text style={styles.value}>
-              {walletInfo?.currency_symbol} {walletInfo?.total?.toLocaleString() ?? '0'}
+              {walletInfo?.currency_symbol} {walletInfo?.total_amount?.toLocaleString() ?? '0'}
             </Text>
           </View>
           <View style={{ padding: 13 }}>

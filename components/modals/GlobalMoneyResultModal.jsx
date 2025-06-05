@@ -9,10 +9,9 @@ const GlobalMoneyResultModal = ({ isVisible, onClose, result }) => {
   const { total, currency_symbol, detected, converted_total_krw, image_base64 } = result;
 
   const detectedList = Object.entries(detected);
+  const todayTripId = useTodayTripIdStore((state) => state.todayTripId);
 
   const addWallethandler = async () => {
-  
-    const todayTripId = useTodayTripIdStore((state) => state.todayTripId);
     if (!todayTripId) {
       Alert.alert('오늘의 여행이 없습니다. 여행을 먼저 등록해주세요.');
       return;
@@ -38,7 +37,7 @@ const GlobalMoneyResultModal = ({ isVisible, onClose, result }) => {
         onClose();
       }
     } catch (error) {
-      console.error('지갑에 추가 실패:', error);
+      console.error('지갑에 추가 실패:', error?.response?.data || error.message || error);
       Alert.alert('지갑에 추가하는데 실패했습니다. 다시 시도해주세요.');
     }
   };
