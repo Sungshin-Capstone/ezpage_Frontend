@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import CustomModal from './CustomModal';
+import expenseApi from '../../apis/expense';
 
 // 결제 전략 열거형
 const PaymentStrategy = {
@@ -47,7 +48,6 @@ class IntegratedPaymentSystem {
     let bestSolution = null;
     let minChange = Infinity;
 
-    // 메모이제이션을 위한 캐시
     const memo = new Map();
 
     const findOptimalPayment = (targetAmount, denomIndex, currentUsed, currentTotal) => {
@@ -119,7 +119,7 @@ class IntegratedPaymentSystem {
     };
   }
 
-  // 개선된 최대 화폐 우선 전략 (지불 부족 시 보완 로직 추가)
+  // 최대 화폐 우선 전략 
   _findLargeBillsPayment(amount, wallet, currency) {
     const denominations = currency.denominations;
     let remaining = this._round(amount, currency.decimalPlaces);
@@ -134,10 +134,8 @@ class IntegratedPaymentSystem {
         remaining = this._round(remaining - denom * count, currency.decimalPlaces);
       }
     }
-
     // 2단계: 부족한 금액이 있다면 가장 작은 화폐로 보완
     if (remaining > 0) {
-      // 역순으로 돌면서 부족한 금액을 채움
       const reversedDenominations = [...denominations].reverse();
       
       for (const denom of reversedDenominations) {
@@ -206,7 +204,6 @@ class IntegratedPaymentSystem {
       }
     }
 
-    // 미세한 반올림 오차 처리
     if (remaining > 0 && remaining < Math.pow(10, -currency.decimalPlaces)) {
       remaining = 0;
     }
@@ -275,21 +272,19 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
     if (!selectedMenus || selectedMenus.length === 0) return 0;
     
     return selectedMenus.reduce((sum, menu) => {
-      // price_original에서 숫자만 추출 (예: "$3.70" -> 3.70)
+      // price_original에서 숫자만 추출
       const price = parseFloat(menu.price_original.replace(/[^0-9.]/g, '')) || 0;
       return sum + price;
     }, 0);
   }, [selectedMenus]);
   
-  // total prop이 있으면 사용하고, 없으면 계산된 값 사용
   const totalUSD = total > 0 ? total : calculatedTotal;
   const totalKRW = Math.round(totalUSD * 1464);
   
-  // 결제 시스템 계산
   const paymentResult = useMemo(() => {
     const system = new IntegratedPaymentSystem();
     
-    // 개선된 더미 지갑 데이터 (더 현실적인 조합)
+    // 더미 지갑 데이터 
     const dummyWallet = {
       20.0: 0,   
       10.0: 1,   
@@ -310,6 +305,27 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
 
   const currencySymbol = paymentResult?.currency || '$';
 
+  // 📌 api 호출
+  const handleSubmit = async () => {
+    try {
+      const addExpense = await expenseApi.addAiExpense(
+        {
+          trip_id: tripId,
+          amount: totalUSD,
+          currency: 'USD',
+          payment_method: 'AI',
+          items: selectedMenus.map(menu => ({
+            id: menu.id,
+            name: menu.name,
+            price: menu.price
+          }))
+        }
+      )
+    } catch (err) {
+
+    }
+  }
+
   return (
     <CustomModal
       isVisible={isVisible}
@@ -317,101 +333,49 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
       onSubmit={onSubmit}
       title="AI 지불 가이드"
     >
-      <ScrollView style={{ maxHeight: 400 }}>
-      <View style={styles.container}>
-        {/* 메뉴 목록 */}
-        {selectedMenus && selectedMenus.map((menu, index) => (
-          <View key={index} style={styles.row}>
-            <Text style={styles.menuText}>{menu.menu_original}</Text>
-            <Text style={styles.priceText}>{menu.price_original}</Text>
-          </View>
-        ))}
-        
-        {/* 합계 */}
-        <View style={[styles.row, styles.totalRow]}>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalUSD}>{currencySymbol}{totalUSD.toFixed(2)}</Text>
-        </View>
-        <View style={styles.krwRow}>
-          <Text style={styles.krw}>KRW</Text>
-          <Text style={styles.krwAmount}>{totalKRW.toLocaleString()}원</Text>
-        </View>
-
-        {/* 결제 방법 안내 */}
-        {paymentResult && !paymentResult.error && (
-          <View>
-            <Text style={styles.paymentTitle}>💳 결제 방법 안내</Text>
-            
-            {/* 지갑 정보 */}
-            <View style={[styles.paymentBox, { marginBottom: 10 }]}>
-              <Text style={styles.breakdownText}>
-                💰 지갑 총액: {currencySymbol}{paymentResult.walletTotal.toFixed(2)}
-              </Text>
-              <Text style={styles.breakdownText}>
-                🍽️ 음식 가격: {currencySymbol}{paymentResult.foodPrice.toFixed(2)}
-              </Text>
+      <ScrollView style={{ maxHeight: 550 }}>
+        <View style={styles.container}>
+          {/* 메뉴 목록 */}
+          {selectedMenus && selectedMenus.map((menu, index) => (
+            <View key={index} style={styles.row}>
+              <Text style={styles.menuText}>{menu.menu_original}</Text>
+              <Text style={styles.priceText}>{menu.price_original}</Text>
             </View>
+          ))}
+        
+          {/* 합계 */}
+          <View style={[styles.row, styles.totalRow]}>
+            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalUSD}>{currencySymbol}{totalUSD.toFixed(2)}</Text>
+          </View>
+          <View style={styles.krwRow}>
+            <Text style={styles.krw}>KRW</Text>
+            <Text style={styles.krwAmount}>{totalKRW.toLocaleString()}원</Text>
+          </View>
 
-            {/* 각 전략별 결제 방법 */}
-            {Object.entries(paymentResult.recommendations.payment).map(([strategyName, paymentData]) => {
-              if (paymentData.error) {
+          {/* 결제 방법 안내 */}
+          {paymentResult && !paymentResult.error && (
+            <View>
+              <Text style={styles.algoTitle}>다음과 같이 지불하세요</Text>
+             
+              {/* 각 전략별 결제 방법 */}
+              {Object.entries(paymentResult.recommendations.payment).map(([strategyName, paymentData], idx, arr) => {
+                if (paymentData.error) {
+                  return (
+                    <View key={strategyName} style={[styles.paymentBox, styles.errorBox, { marginBottom: 20 }]}>
+                      <Text style={styles.errorText}>{paymentData.error}</Text>
+                    </View>
+                  );
+                }
+
+                const isExactPayment = paymentData.change === 0;
+                const isMinimalChange = strategyName === PaymentStrategy.MINIMIZE_CHANGE;
+
                 return (
-                  <View key={strategyName} style={[styles.paymentBox, styles.errorBox, { marginBottom: 10 }]}>
-                    <Text style={styles.paymentTitle}>[{strategyName}]</Text>
-                    <Text style={styles.errorText}>{paymentData.error}</Text>
-                  </View>
-                );
-              }
-
-              const isExactPayment = paymentData.change === 0;
-              const isMinimalChange = strategyName === PaymentStrategy.MINIMIZE_CHANGE;
-
-              return (
-                <View key={strategyName} style={[styles.paymentBox, { marginBottom: 10 }]}>
-                  <Text style={styles.paymentTitle}>
-                    ✅ [{strategyName}] 
-                    {isExactPayment && "정확"}
-                    {isMinimalChange && !isExactPayment && "최소 거스름돈"}
-                  </Text>
-                  
-                  {/* 사용할 화폐 */}
-                  <Text style={[styles.breakdownText, { marginTop: 8, marginBottom: 4 }]}>
-                    💵 사용할 화폐:
-                  </Text>
-                  {Object.entries(paymentData.used).map(([denom, count]) => (
-                    <View key={denom} style={styles.breakdownRow}>
-                      <Text style={styles.breakdownText}>
-                        {currencySymbol}{parseFloat(denom).toFixed(2)} × {count}개
-                      </Text>
-                      <Text style={styles.breakdownSubtotal}>
-                        = {currencySymbol}{(parseFloat(denom) * count).toFixed(2)}
-                      </Text>
-                    </View>
-                  ))}
-                  
-                  {/* 총 지불 금액 */}
-                  <View style={styles.totalPaymentRow}>
-                    <Text style={styles.paid}>
-                      총 지불: {currencySymbol}{paymentData.totalPaid.toFixed(2)}
-                    </Text>
-                    <View style={styles.changeRow}>
-                      <Text style={styles.changeLabel}>거스름돈:</Text>
-                      <Text style={[
-                        styles.changeValue, 
-                        isExactPayment && styles.perfectChange,
-                        paymentData.change > 0 && styles.hasChange
-                      ]}>
-                        {currencySymbol}{paymentData.change.toFixed(2)}
-                        {isExactPayment && " ✨"}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* 거스름돈 구성 */}
-                  {paymentData.change > 0 && paymentResult.recommendations.change[strategyName] && !paymentResult.recommendations.change[strategyName].error && (
-                    <View style={{ marginTop: 8 }}>
-                      <Text style={styles.breakdownText}>🪙 받을 거스름돈:</Text>
-                      {Object.entries(paymentResult.recommendations.change[strategyName].change).map(([denom, count]) => (
+                  <React.Fragment key={strategyName}>
+                    <View style={[styles.paymentBox, { marginBottom: 10 }]}>
+                      {/* 사용할 화폐 */}
+                      {Object.entries(paymentData.used).map(([denom, count]) => (
                         <View key={denom} style={styles.breakdownRow}>
                           <Text style={styles.breakdownText}>
                             {currencySymbol}{parseFloat(denom).toFixed(2)} × {count}개
@@ -421,30 +385,62 @@ const PaymentGuide = ({ isVisible, onClose, onSubmit, selectedMenus, total, guid
                           </Text>
                         </View>
                       ))}
-                    </View>
-                  )}
-                </View>
-              );
-            })}
-          </View>
-        )}
+                
+                      {/* 총 지불 금액 */}
+                      <View style={styles.totalPaymentRow}>
+                        <Text style={styles.paid}>
+                          총 지불: {currencySymbol}{paymentData.totalPaid.toFixed(2)}
+                        </Text>
+                        <View style={styles.changeRow}>
+                        </View>
+                      </View>
 
-        {/* 에러 처리 */}
-        {paymentResult && paymentResult.error && (
-          <View style={[styles.paymentBox, styles.errorBox]}>
-            <Text style={styles.paymentTitle}>결제 불가</Text>
-            <Text style={styles.errorText}>{paymentResult.error}</Text>
-            {paymentResult.walletTotal && paymentResult.requiredAmount && (
-              <View style={{ marginTop: 8 }}>
-                <Text style={styles.breakdownText}>
-                  부족 금액: {currencySymbol}{(paymentResult.requiredAmount - paymentResult.walletTotal).toFixed(2)}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
+                      {/* 거스름돈 구성 */}
+                      {paymentData.change > 0 && paymentResult.recommendations.change[strategyName] && !paymentResult.recommendations.change[strategyName].error && (
+                        <View style={{ marginTop: 8 }}>
+                          <Text style={styles.breakdownText}>거스름돈:</Text>
+                          {Object.entries(paymentResult.recommendations.change[strategyName].change).map(([denom, count]) => (
+                            <View key={denom} style={styles.breakdownRow}>
+                              <Text style={styles.breakdownText}>
+                                {currencySymbol}{parseFloat(denom).toFixed(2)} × {count}개
+                              </Text>
+                              <Text style={styles.breakdownSubtotal}>
+                                = {currencySymbol}{(parseFloat(denom) * count).toFixed(2)}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                    
+                    {/* 두 전략 사이에 "또는" 표시 */}
+                    {idx === arr.length - 2 && (
+                      <View style={{ alignItems: 'center', paddingVertical: 5, marginBottom: 10 }}>
+                        <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#888' }}>또는</Text>
+                      </View>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </View>
+          )}
+
+          {/* 에러 처리 */}
+          {paymentResult && paymentResult.error && (
+            <View style={[styles.paymentBox, styles.errorBox]}>
+              <Text style={styles.paymentTitle}>결제 불가</Text>
+              <Text style={styles.errorText}>{paymentResult.error}</Text>
+              {paymentResult.walletTotal && paymentResult.requiredAmount && (
+                <View style={{ marginTop: 8 }}>
+                  <Text style={styles.breakdownText}>
+                    부족 금액: {currencySymbol}{(paymentResult.requiredAmount - paymentResult.walletTotal).toFixed(2)}
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
         </View>
-        </ScrollView>
+      </ScrollView>
     </CustomModal>
   );
 };
@@ -453,8 +449,8 @@ export default PaymentGuide;
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 10,
-    gap: 12,
+    paddingHorizontal: 15,
+    gap: 15,
   },
   row: {
     flexDirection: 'row',
@@ -500,9 +496,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   paymentBox: {
-    backgroundColor: '#eaf2ff',
+    backgroundColor: '#E6F1FF',
     borderRadius: 10,
-    padding: 10,
+    padding: 20,
+    gap: 5,
   },
   errorBox: {
     backgroundColor: '#ffebee',
@@ -514,7 +511,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 2,
-    paddingLeft: 8,
+    paddingLeft: 10,
   },
   breakdownText: {
     fontSize: 15,
@@ -563,5 +560,11 @@ const styles = StyleSheet.create({
   hasChange: {
     color: '#FF9800',
     fontWeight: '600',
+  },
+  algoTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 15,
   },
 });

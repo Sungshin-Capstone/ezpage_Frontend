@@ -1,4 +1,3 @@
-// components/modals/AddExpense.js
 import React, { useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import CustomModal from './CustomModal';

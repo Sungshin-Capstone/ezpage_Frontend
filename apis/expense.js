@@ -42,10 +42,11 @@ const expenseApi = {
       throw error;
     }
   },
-
-  addAiExpense: async (accessToken, formData) => {
+  addAiExpense: async (formData) => {
     try {
-      const response = await api.post("/api/v1/expenses/ai/", formData, {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+
+      const response = await api.post("/api/v1/expenses/guide-payment/", formData, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

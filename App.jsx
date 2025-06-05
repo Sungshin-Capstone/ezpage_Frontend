@@ -9,6 +9,7 @@ import SignUp from './app/SignUp';
 import MyWallet from './app/MyWallet';
 import useUserStore from './stores/userStore';
 import SplashScreen from "react-native-splash-screen";
+import { useTodayTripIdStore } from './stores/useTodayTripIdStore';
 
 
 const Stack = createNativeStackNavigator();
@@ -25,6 +26,10 @@ export default function App() {
       SplashScreen.hide();
     }, 3000); 
   });
+
+  useEffect(() => {
+    useTodayTripIdStore.getState().fetchAndStoreTodayTripId();
+  }, []);
   
   return (
     <NavigationContainer>

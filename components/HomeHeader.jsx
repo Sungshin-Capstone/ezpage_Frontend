@@ -3,14 +3,19 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import useUserStore from '../stores/userStore';
 import { useTripStore } from '../stores/useTripStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import tripApi from '../apis/trip';
 import { countryCodeToFlag } from '../utils/countryCodeToFlag';
+import { useTodayTripIdStore } from '../stores/useTodayTripIdStore';
+import walletApi from '../apis/wallet';
+
 
 function HomeHeader() {
   const navigation = useNavigation();
   const user = useUserStore((state) => state.user);
   const { todayTrip, setTodayTrip } = useTripStore();
+  const [walletInfo, setWalletInfo] = useState(null);
+  const { todayTripId, fetchAndStoreTodayTripId } = useTodayTripIdStore();
 
   useEffect(() => {
   const fetchTrips = async () => {
@@ -22,15 +27,30 @@ function HomeHeader() {
         return todayStr >= trip.start_date && todayStr <= trip.end_date;
       });
 
-      setTodayTrip(matchedTrip); // useState로 관리
+      setTodayTrip(matchedTrip); 
     } catch (e) {
       console.error('🔥 여행 불러오기 실패:', e);
     }
   };
 
   fetchTrips();
-}, []);
+  }, []);
+  
+  useEffect(() => {
+  const loadWallet = async () => {
+    if (!todayTripId) return;
+    try {
+      const data = await walletApi.getWalletInfo(todayTripId);
+      setWalletInfo(data);
+    } catch (e) {
+      console.error('지갑 정보 불러오기 실패:', e);
+    }
+  };
 
+  fetchAndStoreTodayTripId(); 
+  loadWallet(); 
+  }, [todayTripId]);
+  
   const renderTripInfo = () => {
     if (!todayTrip) {
       return <Text style={styles.today}>오늘은 여행일정이 없어요!</Text>;
@@ -66,20 +86,21 @@ function HomeHeader() {
       {renderTripInfo()}
 
       <TouchableOpacity onPress={() => navigation.navigate('MyWallet')}>
-      
-        <LinearGradient
-          colors={['#ACD0FF', '#FFFFFF']}
-          style={styles.card}
-        >
+        <LinearGradient colors={['#ACD0FF', '#FFFFFF']} style={styles.card}>
           <View style={{ padding: 15 }}>
             <Text style={styles.label}>현재 보유 중인 금액</Text>
-            <Text style={styles.value}>¥ 653</Text>
+            <Text style={styles.value}>
+              {walletInfo?.currency_symbol} {walletInfo?.total?.toLocaleString() ?? '0'}
+            </Text>
           </View>
-          <View style={{padding: 13 }}>
-            <Text style={styles.change}>92만 8,305원</Text>
+          <View style={{ padding: 13 }}>
+            <Text style={styles.change}>
+              {walletInfo?.converted_total_krw
+                ? `${walletInfo.converted_total_krw.toLocaleString()}원`
+                : '로딩 중...'}
+            </Text>
           </View>
         </LinearGradient>
-        
       </TouchableOpacity>
     </View>
   );
